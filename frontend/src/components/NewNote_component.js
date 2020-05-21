@@ -10,11 +10,24 @@ export default class NewNote_component extends Component {
         userSelected: '',
         title: '',
         content: '',
-        date: new Date()
+        date: new Date(),
+        editing: false,
+        _id: ''
     }
 
     async componentDidMount() {
         this.getUsers()
+        if(this.props.match.params.id){
+            const oneNote = await axios.get(`http://localhost:4000/api/notes/${this.props.match.params.id}`)
+            console.log(oneNote.data.content)
+            this.setState({
+                title: oneNote.data.title,
+                content: oneNote.data.content,
+                editing: true,
+                _id: this.props.match.params.id
+            })
+
+        }
     }
 
     getUsers = async () => {
@@ -33,7 +46,11 @@ export default class NewNote_component extends Component {
             date: this.state.date,
             author: this.state.userSelected
         }
-        await axios.post('http://localhost:4000/api/notes', newNote)
+        if(this.state.editing){
+            await axios.put(`http://localhost:4000/api/notes/${this.state._id}`, newNote)
+        } else {
+            await axios.post('http://localhost:4000/api/notes', newNote)
+        }
         window.location.href = '/'
     }
 
@@ -70,6 +87,7 @@ export default class NewNote_component extends Component {
                             type="text" 
                             className="form-control" 
                             name="title"
+                            value={this.state.title}
                             placeholder="Title"
                             onChange={this.onChange}
                             required/>
@@ -78,6 +96,7 @@ export default class NewNote_component extends Component {
                         <textarea 
                             className="form-control"
                             name="content"
+                            value ={this.state.content}
                             placeholder="Content"
                             onChange = {this.onChange}
                             required
