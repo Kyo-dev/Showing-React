@@ -19,13 +19,24 @@ export default class NewNote_component extends Component {
 
     getUsers = async () => {
         const res = await axios.get('http://localhost:4000/api/users')
-        this.setState({ users: res.data })
+        this.setState({ 
+            users: res.data,
+            userSelected: res.data[0].username
+        })
     }
 
-    onSubmit = e => {
+    onSubmit = async e => {
         e.preventDefault()
-
+        const newNote ={
+            title: this.state.title,
+            content: this.state.content,
+            date: this.state.date,
+            author: this.state.userSelected
+        }
+        await axios.post('http://localhost:4000/api/notes', newNote)
+        window.location.href = '/'
     }
+
     onChange = e => {
         this.setState({
             [e.target.name]: e.target.value
@@ -48,7 +59,7 @@ export default class NewNote_component extends Component {
                         >
                             {
                                 this.state.users.map(e =>
-                                    <option key={e._id} value={e._id}>
+                                    <option key={e._id} value={e.username}>
                                         {e.username}
                                     </option>)
                             }
